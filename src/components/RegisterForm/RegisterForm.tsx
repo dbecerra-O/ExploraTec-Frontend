@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiMail, FiLock, FiUser, FiCheck, FiX, FiEye } from 'react-icons/fi';
+import { FiMail, FiLock, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
 import tecsupImage from '../../assets/tecsup-register.png';
 
 interface RegisterFormProps {
@@ -13,6 +13,7 @@ interface RegisterFormProps {
     onConfirmPasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onSubmit: (e: React.FormEvent) => void;
     error?: string;
+    loading?: boolean;
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
@@ -25,14 +26,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     onPasswordChange,
     onConfirmPasswordChange,
     onSubmit,
-    error
+    error,
+    loading = false
 }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     
-    // Validar si las contraseñas coinciden
     const passwordsMatch = password && confirmPassword && password === confirmPassword;
     const passwordsDontMatch = confirmPassword && password !== confirmPassword;
+
+    const isFormValid = email && username && password && confirmPassword && passwordsMatch;
 
     return (
         <div className="fixed inset-0 bg-gradient-to-br from-sky-100 to-sky-20 flex items-center justify-center p-4 overflow-hidden">
@@ -61,6 +64,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                                         placeholder="Correo electrónico"
                                         value={email}
                                         onChange={onEmailChange}
+                                        disabled={loading}
                                     />
                                 </div>
 
@@ -75,6 +79,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                                         placeholder="Nombre de usuario"
                                         value={username}
                                         onChange={onUsernameChange}
+                                        disabled={loading}
                                     />
                                 </div>
                                 
@@ -89,16 +94,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                                         placeholder="Contraseña"
                                         value={password}
                                         onChange={onPasswordChange}
+                                        disabled={loading}
                                     />
                                     <button
                                         type="button"
                                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
                                         onClick={() => setShowPassword(!showPassword)}
+                                        disabled={loading}
                                     >
                                         {showPassword ? (
-                                            <FiEye className="text-sky-500 text-sm font-medium"></FiEye>
+                                            <FiEyeOff className="h-5 w-5 text-sky-500" />
                                         ) : (
-                                            <FiEye className="text-sky-500 text-sm font-medium"></FiEye>
+                                            <FiEye className="h-5 w-5 text-sky-500" />
                                         )}
                                     </button>
                                 </div>
@@ -118,20 +125,21 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                                         placeholder="Confirmar contraseña"
                                         value={confirmPassword}
                                         onChange={onConfirmPasswordChange}
+                                        disabled={loading}
                                     />
                                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center space-x-2">
-                                        {confirmPassword && (
-                                            <span className={`${passwordsMatch ? 'text-green-500' : 'text-red-500'}`}>
-                                                {passwordsMatch}
-                                            </span>
-                                        )}
-                                        <FiEye
+                                        <button
                                             type="button"
-                                            className="text-sky-500 text-sm font-medium"
+                                            className="flex items-center"
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            disabled={loading}
                                         >
-                                            {showConfirmPassword ? "Ocultar" : "Mostrar"}
-                                        </FiEye>
+                                            {showConfirmPassword ? (
+                                                <FiEyeOff className="h-5 w-5 text-sky-500" />
+                                            ) : (
+                                                <FiEye className="h-5 w-5 text-sky-500" />
+                                            )}
+                                        </button>
                                     </div>
                                 </div>
                                 
@@ -147,16 +155,23 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                             )}
 
                             <button
-                            type="submit"
-                            disabled={passwordsDontMatch || !password || !confirmPassword}
-                            className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 transition duration-150 ease-in-out text-base font-semibold shadow-md ${
-                                passwordsDontMatch || !password || !confirmPassword
-                                    ? "bg-gray-400 cursor-not-allowed" 
-                                    : "bg-sky-500 hover:bg-sky-600"
-                            }`}
-                        >
-                            Registrarse
-                        </button>
+                                type="submit"
+                                disabled={!isFormValid || loading}
+                                className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 transition duration-150 ease-in-out text-base font-semibold shadow-md ${
+                                    !isFormValid || loading
+                                        ? "bg-gray-400 cursor-not-allowed" 
+                                        : "bg-sky-500 hover:bg-sky-600"
+                                }`}
+                            >
+                                {loading ? (
+                                    <div className="flex items-center">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                        Registrando...
+                                    </div>
+                                ) : (
+                                    "Registrarse"
+                                )}
+                            </button>
                             <div className="text-center">
                                 <span className="text-gray-600">¿Ya tienes una cuenta? </span>
                                 <a href="/login" className="text-sky-600 hover:text-sky-700 font-medium">
