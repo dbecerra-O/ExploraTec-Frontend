@@ -5,16 +5,20 @@ import appData from "./appData";
 import './VirtualTour.css';
 import { useNavigate } from "react-router-dom";
 
+const CURRENT_SCENE_KEY = "current_scene_id";
+
 type SceneData = any;
 
 const VirtualTour: React.FC = () => {
   const panoRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<any>(null);
   const scenesRef = useRef<any[]>([]);
-  const [currentSceneId, setCurrentSceneId] = useState<string>("");
+  const [currentSceneId, setCurrentSceneId] = useState<string>(() => {
+    return localStorage.getItem(CURRENT_SCENE_KEY) || "";
+  });
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const [activeInfoHotspot, setActiveInfoHotspot] = useState<any>(null);
-  const { clearConversation } = useChatbot();
+  const { clearConversation, updateSceneContext } = useChatbot();
   const navigate = useNavigate();
 
 
@@ -72,8 +76,15 @@ const VirtualTour: React.FC = () => {
     scenesRef.current = createdScenes;
 
     if (createdScenes.length > 0) {
-      createdScenes[0].scene.switchTo();
-      setCurrentSceneId(createdScenes[0].data.id);
+      const savedSceneId = localStorage.getItem(CURRENT_SCENE_KEY);
+      const initialScene = savedSceneId 
+        ? createdScenes.find(s => s.data.id === savedSceneId) || createdScenes[0]
+        : createdScenes[0];
+        
+      initialScene.scene.switchTo();
+      setCurrentSceneId(initialScene.data.id);
+      updateSceneContext(initialScene.data.id);
+      localStorage.setItem(CURRENT_SCENE_KEY, initialScene.data.id);
     }
 
     return () => {
@@ -84,6 +95,7 @@ const VirtualTour: React.FC = () => {
       } catch { }
       viewerRef.current = null;
       scenesRef.current = [];
+      updateSceneContext(null);
     };
   }, []);
 
@@ -92,6 +104,8 @@ const VirtualTour: React.FC = () => {
     if (target) {
       target.scene.switchTo();
       setCurrentSceneId(sceneId);
+      updateSceneContext(sceneId);
+      localStorage.setItem(CURRENT_SCENE_KEY, sceneId);
       setActiveInfoHotspot(null);
     }
   };
@@ -125,6 +139,8 @@ const VirtualTour: React.FC = () => {
       if (targetScene) {
         targetScene.scene.switchTo();
         setCurrentSceneId(targetScene.data.id);
+        updateSceneContext(targetScene.data.id);
+        localStorage.setItem(CURRENT_SCENE_KEY, targetScene.data.id);
       }
     });
 
@@ -174,6 +190,7 @@ const VirtualTour: React.FC = () => {
 
     const handleExitTour = () => {
     clearConversation();
+    localStorage.removeItem(CURRENT_SCENE_KEY);
     navigate("/");
   };
 

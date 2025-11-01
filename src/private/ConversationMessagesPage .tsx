@@ -2,6 +2,7 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import ConversationMessages from "../components/ConversationMessages/ConversationMessages";
+import AdminNavbar from "../components/AdminNavbar/AdminNavbar";
 
 const ConversationMessagesPage: React.FC = () => {
   const { userId, conversationId } = useParams<{
@@ -10,6 +11,7 @@ const ConversationMessagesPage: React.FC = () => {
   }>();
 
   return (
+    <><AdminNavbar />
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
@@ -28,6 +30,7 @@ const ConversationMessagesPage: React.FC = () => {
         conversationId={conversationId ? Number(conversationId) : null}
       />
     </div>
+    </>
   );
 };
 

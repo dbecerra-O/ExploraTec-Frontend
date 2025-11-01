@@ -3,7 +3,7 @@ import api from "../config";
 interface SendMessagePayload {
   content: string;
   conversation_id?: number | null;
-  scene_context_id?: number | null;
+  scene_context?: string | null;
 }
 
 export const sendMessage = async (payload: SendMessagePayload) => {

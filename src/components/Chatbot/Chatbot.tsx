@@ -1,8 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiSend, FiX, FiLogIn, FiHome } from "react-icons/fi";
+import { FiSend, FiX, FiLogIn, FiTrash2 } from "react-icons/fi";
 import { useChatbot } from "../../hooks/useChatbot";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from 'react-markdown';
+
+// Componente para renderizar mensajes con Markdown
+const MessageContent: React.FC<{ text: string; sender: "user" | "bot" }> = ({ text, sender }) => {
+  if (sender === "user") {
+    return <div className="whitespace-pre-wrap">{text}</div>;
+  }
+  
+  return (
+    <div className="prose prose-sm max-w-none">
+      <ReactMarkdown>{text}</ReactMarkdown>
+    </div>
+  );
+};
 
 export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { isAuthenticated, user } = useAuth();
@@ -43,6 +57,10 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   const handleLogin = () => {
     onClose();
     navigate("/login");
+  };
+
+  const handleClearChat = () => {
+    clearConversation();
   };
 
   // Si no está autenticado, mostrar versión de login
@@ -92,30 +110,40 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
         ref={modalRef}
         className="w-80 h-[450px] bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden border"
       >
-        {/* Header con botón de salir */}
+        {/* Header con botones */}
         <div className="flex justify-between items-center px-4 py-2 bg-sky-600 text-white">
-            <h2 className="text-sm font-semibold">Asistente Virtual</h2>
+          <h2 className="text-sm font-semibold">Asistente Virtual</h2>
         </div>
 
         {/* Chat body */}
-        <div className="flex-1 p-3 space-y-2 overflow-y-auto bg-sky-50">
+        <div className="flex-1 p-3 space-y-3 overflow-y-auto bg-sky-50">
           {messages.map((msg, idx) => (
             <div
               key={idx}
               className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`px-3 py-2 rounded-lg text-sm break-words max-w-[70%] ${
+                className={`px-3 py-2 rounded-lg text-sm break-words max-w-[85%] ${
                   msg.sender === "user"
-                    ? "bg-sky-600 text-white"
-                    : "bg-gray-200 text-gray-900"
+                    ? "bg-sky-600 text-white rounded-br-none"
+                    : "bg-white text-gray-900 border border-gray-200 rounded-bl-none shadow-sm"
                 }`}
               >
-                {msg.text}
+                <MessageContent text={msg.text} sender={msg.sender} />
               </div>
             </div>
           ))}
-          {loading && <p className="text-gray-500 text-xs">Escribiendo...</p>}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="px-3 py-2 rounded-lg bg-white border border-gray-200 rounded-bl-none shadow-sm">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                </div>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -127,12 +155,13 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="flex-1 border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+            disabled={loading}
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
           <button
             onClick={handleSend}
-            disabled={loading}
-            className="ml-2 bg-sky-600 hover:bg-sky-700 disabled:bg-sky-400 text-white p-2 rounded-full transition-colors duration-200"
+            disabled={loading || !input.trim()}
+            className="ml-2 bg-sky-600 hover:bg-sky-700 disabled:bg-gray-400 text-white p-2 rounded-full transition-colors duration-200 disabled:cursor-not-allowed"
           >
             <FiSend className="w-4 h-4" />
           </button>

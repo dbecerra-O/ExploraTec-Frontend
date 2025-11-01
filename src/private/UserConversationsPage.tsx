@@ -3,11 +3,14 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import ConversationList from "../components/UserConversationsList/UserConversationList";
+import AdminNavbar from "../components/AdminNavbar/AdminNavbar";
 
 const UserConversationsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
 
   return (
+    <>
+    <AdminNavbar />
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
@@ -22,6 +25,7 @@ const UserConversationsPage: React.FC = () => {
       </div>
       <ConversationList userId={userId ? Number(userId) : null} />
     </div>
+    </>
   );
 };
 
