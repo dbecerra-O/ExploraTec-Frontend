@@ -61,9 +61,6 @@ const UserConversationsList: React.FC<ConversationListProps> = ({ userId }) => {
             </div>
             <div>
               <h3 className="text-white font-semibold text-lg">Conversaciones</h3>
-              <p className="text-purple-100 text-sm">
-                {conversations.length} conversaciones encontradas
-              </p>
             </div>
           </div>
         </div>
@@ -90,12 +87,6 @@ const UserConversationsList: React.FC<ConversationListProps> = ({ userId }) => {
                       <h4 className="text-lg font-semibold text-gray-900 truncate">
                         {conv.title || "Conversación sin título"}
                       </h4>
-                      {conv.is_active && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                          Activa
-                        </span>
-                      )}
                     </div>
                     
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -138,12 +129,6 @@ const UserConversationsList: React.FC<ConversationListProps> = ({ userId }) => {
       <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div className="flex items-center space-x-4">
-            <span className="flex items-center space-x-1">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>
-                Activas: {conversations.filter(c => c.is_active).length}
-              </span>
-            </span>
             <span className="flex items-center space-x-1">
               <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
               <span>

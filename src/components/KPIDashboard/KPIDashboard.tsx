@@ -1,4 +1,3 @@
-// components/KPIDashboard.tsx
 import React from 'react';
 import { KPICard } from '../KPICard/KPICard';
 import { StatisticsList } from '../StatisticsList/StatisticsList';
@@ -11,7 +10,7 @@ export const KPIDashboard: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-100 p-6">
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-center justify-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
@@ -41,7 +40,7 @@ export const KPIDashboard: React.FC = () => {
 
     if (!kpis) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-100 p-6">
+            <div className="min-h-screen bg-gradient-to-br bg-gray-50 to-gray-100 p-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center text-gray-600">
                         No hay datos disponibles
@@ -52,7 +51,7 @@ export const KPIDashboard: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-100 p-4 sm:p-6">
+        <div className="min-h-screen bg-gray-50 p-6 sm:p-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">

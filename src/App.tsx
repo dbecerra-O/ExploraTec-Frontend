@@ -9,6 +9,7 @@ import ChatbotTourPage from "./public/tour360/ChatbotWithTourPage";
 import UserConversationsPage from "./private/UserConversationsPage";
 import ConversationMessagesPage from "./private/ConversationMessagesPage ";
 import AdminKPIsPage from "./private/AdminKPIsPage";
+import EventsAdminPage from "./private/EventsAdminPage";
 
 function App() {
   return (
@@ -42,6 +43,15 @@ function App() {
           element={
             <ProtectedRoute roles={["ADMIN"]}>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/events"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <EventsAdminPage />
             </ProtectedRoute>
           }
         />

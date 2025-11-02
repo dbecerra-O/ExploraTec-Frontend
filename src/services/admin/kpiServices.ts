@@ -1,5 +1,5 @@
 import { getMessages } from './conversationServices';
-import { Message, MessagesResponse } from '../../types/Message';
+import { Message} from '../../types/Message';
 
 export type KPIs = {
     totalMessages: number;

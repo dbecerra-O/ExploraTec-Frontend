@@ -13,11 +13,6 @@ export type Conversation = {
   message_count: number;
 };
 
-export const getUserConversations = async (userId: number): Promise<Conversation[]> => {
-  const response = await config.get<Conversation[]>(`/admin/users/${userId}/conversations`);
-  return response.data;
-};
-
 export const getConversationMessages = async (
   userId: number,
   conversationId: number

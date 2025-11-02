@@ -1,4 +1,3 @@
-// src/pages/private/ConversationMessagesPage.tsx
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import ConversationMessages from "../components/ConversationMessages/ConversationMessages";
@@ -11,8 +10,9 @@ const ConversationMessagesPage: React.FC = () => {
   }>();
 
   return (
-    <><AdminNavbar />
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50">
+      <AdminNavbar />
+    <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
           Mensajes de la conversación {conversationId}
@@ -30,7 +30,7 @@ const ConversationMessagesPage: React.FC = () => {
         conversationId={conversationId ? Number(conversationId) : null}
       />
     </div>
-    </>
+  </div>
   );
 };
 

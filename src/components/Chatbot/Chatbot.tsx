@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiSend, FiX, FiLogIn, FiTrash2 } from "react-icons/fi";
+import { FiSend, FiX, FiLogIn } from "react-icons/fi";
 import { useChatbot } from "../../hooks/useChatbot";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ const MessageContent: React.FC<{ text: string; sender: "user" | "bot" }> = ({ te
   if (sender === "user") {
     return <div className="whitespace-pre-wrap">{text}</div>;
   }
-  
+
   return (
     <div className="prose prose-sm max-w-none">
       <ReactMarkdown>{text}</ReactMarkdown>
@@ -123,11 +123,10 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
               className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`px-3 py-2 rounded-lg text-sm break-words max-w-[85%] ${
-                  msg.sender === "user"
-                    ? "bg-sky-600 text-white rounded-br-none"
-                    : "bg-white text-gray-900 border border-gray-200 rounded-bl-none shadow-sm"
-                }`}
+                className={`px-3 py-2 rounded-lg text-sm break-words max-w-[85%] ${msg.sender === "user"
+                  ? "bg-sky-600 text-white rounded-br-none"
+                  : "bg-white text-gray-900 border border-gray-200 rounded-bl-none shadow-sm"
+                  }`}
               >
                 <MessageContent text={msg.text} sender={msg.sender} />
               </div>

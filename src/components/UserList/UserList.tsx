@@ -86,9 +86,6 @@ const UserList = () => {
                 Usuario
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                Estado
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Fecha de Registro
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -118,22 +115,6 @@ const UserList = () => {
                         {user.email}
                       </div>
                     </div>
-                  </div>
-                </td>
-
-                {/* Columna de estado */}
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className={`w-3 h-3 rounded-full mr-2 ${
-                      user.is_active ? 'bg-green-500' : 'bg-red-500'
-                    }`}></div>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.is_active 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {user.is_active ? 'Activo' : 'Inactivo'}
-                    </span>
                   </div>
                 </td>
 
@@ -169,16 +150,13 @@ const UserList = () => {
         </table>
       </div>
 
-      {/* Versión Tablet - Sin fecha */}
+      {/* Versión Tablet - Solo usuario y acciones */}
       <div className="hidden md:block lg:hidden bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Usuario
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                Estado
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Acciones
@@ -203,16 +181,6 @@ const UserList = () => {
                         {user.email}
                       </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center">
-                    <div className={`w-2 h-2 rounded-full mr-2 ${
-                      user.is_active ? 'bg-green-500' : 'bg-red-500'
-                    }`}></div>
-                    <span className="text-xs font-medium text-gray-700">
-                      {user.is_active ? 'Activo' : 'Inactivo'}
-                    </span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
@@ -251,14 +219,6 @@ const UserList = () => {
                     {user.email}
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center">
-                <div className={`w-2 h-2 rounded-full mr-1 ${
-                  user.is_active ? 'bg-green-500' : 'bg-red-500'
-                }`}></div>
-                <span className="text-xs text-gray-600">
-                  {user.is_active ? 'Activo' : 'Inactivo'}
-                </span>
               </div>
             </div>
             

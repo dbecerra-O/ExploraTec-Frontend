@@ -1,4 +1,3 @@
-// components/DailyMessagesChart.tsx
 import React from 'react';
 
 interface DailyMessage {
