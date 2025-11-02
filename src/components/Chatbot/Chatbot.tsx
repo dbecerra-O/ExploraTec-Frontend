@@ -23,6 +23,7 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   const navigate = useNavigate();
   const { messages, sendUserMessage, loading, clearConversation } = useChatbot();
   const [input, setInput] = useState("");
+  const navigateToTour = useNavigate();
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
@@ -129,6 +130,55 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                   }`}
               >
                 <MessageContent text={msg.text} sender={msg.sender} />
+                {/* Render navigation action buttons when present */}
+                {msg.actions && msg.actions.type === "navigation" && (
+                  <div className="mt-2 flex space-x-2">
+                    <button
+                      className="bg-white border border-sky-600 text-sky-600 px-3 py-1 rounded-md text-sm"
+                      onClick={() => {
+                        const payload = msg.actions.payload;
+                        const path = payload?.pathResult?.path || payload?.navigation?.path || null;
+                        if (path) {
+                          localStorage.setItem("navigation_path", JSON.stringify(path));
+                          // start at first element (from)
+                          localStorage.setItem("navigation_step_index", "0");
+                        }
+                        // dispatch event so VirtualTour (if already mounted) will start stepping immediately
+                        try {
+                          const ev = new CustomEvent('tour:navigate', { detail: { mode: 'step', path } });
+                          window.dispatchEvent(ev);
+                        } catch (err) {}
+                        // navigate to tour page which will process the navigation_path if not mounted
+                        navigateToTour("/tour360");
+                        onClose();
+                      }}
+                    >
+                      Guiar paso a paso
+                    </button>
+
+                    <button
+                      className="bg-sky-600 text-white px-3 py-1 rounded-md text-sm"
+                      onClick={() => {
+                        const payload = msg.actions.payload;
+                        const to = payload?.navigation?.to_scene || payload?.pathResult?.path?.slice(-1)[0];
+                        if (to) {
+                          localStorage.setItem("current_scene_id", String(to));
+                        }
+                        // clear any pending navigation path
+                        localStorage.removeItem("navigation_path");
+                        // dispatch event so VirtualTour can switch immediately if mounted
+                        try {
+                          const ev = new CustomEvent('tour:navigate', { detail: { mode: 'direct', to } });
+                          window.dispatchEvent(ev);
+                        } catch (err) {}
+                        navigateToTour("/tour360");
+                        onClose();
+                      }}
+                    >
+                      Ir directo
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

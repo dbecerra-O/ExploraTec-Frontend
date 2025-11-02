@@ -75,6 +75,67 @@ const VirtualTour: React.FC = () => {
 
     scenesRef.current = createdScenes;
 
+    // Helper to process a navigation path step-by-step
+    const processNavPath = (navPath: string[], startIndex = 0) => {
+      if (!navPath || navPath.length === 0) return;
+      let idx = startIndex;
+      const stepThrough = () => {
+        if (!navPath || idx >= navPath.length) {
+          return;
+        }
+        const nextScene = navPath[idx];
+        const target = createdScenes.find(s => s.data.id === nextScene);
+        if (target) {
+          target.scene.switchTo();
+          setCurrentSceneId(nextScene);
+          updateSceneContext(nextScene);
+          localStorage.setItem(CURRENT_SCENE_KEY, nextScene);
+        }
+        idx++;
+        localStorage.setItem("navigation_step_index", String(idx));
+        if (idx < navPath.length) {
+          setTimeout(stepThrough, 1200);
+        } else {
+          // finished
+          localStorage.removeItem("navigation_path");
+          localStorage.removeItem("navigation_step_index");
+        }
+      };
+      // begin stepping
+      setTimeout(stepThrough, 300);
+    };
+
+    // Listen for external navigation requests (from Chatbot)
+    const navHandler = (e: Event) => {
+      try {
+        const ce = e as CustomEvent;
+        const detail = ce.detail || {};
+        const mode = detail.mode;
+        if (mode === 'step') {
+          const path = detail.path || JSON.parse(localStorage.getItem('navigation_path') || 'null');
+          const startIdx = Number(localStorage.getItem('navigation_step_index') || 0);
+          if (path && Array.isArray(path)) {
+            processNavPath(path, startIdx);
+          }
+        } else if (mode === 'direct') {
+          const to = detail.to || localStorage.getItem(CURRENT_SCENE_KEY);
+          if (to) {
+            const target = createdScenes.find(s => s.data.id === to);
+            if (target) {
+              target.scene.switchTo();
+              setCurrentSceneId(to);
+              updateSceneContext(to);
+              localStorage.setItem(CURRENT_SCENE_KEY, to);
+            }
+          }
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    window.addEventListener('tour:navigate', navHandler as EventListener);
+
     if (createdScenes.length > 0) {
       const savedSceneId = localStorage.getItem(CURRENT_SCENE_KEY);
       const initialScene = savedSceneId 
@@ -85,6 +146,18 @@ const VirtualTour: React.FC = () => {
       setCurrentSceneId(initialScene.data.id);
       updateSceneContext(initialScene.data.id);
       localStorage.setItem(CURRENT_SCENE_KEY, initialScene.data.id);
+      // If a navigation path was requested (from chatbot) at startup, process it step-by-step
+      try {
+        const navPathRaw = localStorage.getItem("navigation_path");
+        if (navPathRaw) {
+          const navPath: string[] = JSON.parse(navPathRaw);
+          const startIdx = Number(localStorage.getItem("navigation_step_index") || 0);
+          processNavPath(navPath, startIdx);
+        }
+      } catch (err) {
+        localStorage.removeItem("navigation_path");
+        localStorage.removeItem("navigation_step_index");
+      }
     }
 
     return () => {
@@ -96,6 +169,7 @@ const VirtualTour: React.FC = () => {
       viewerRef.current = null;
       scenesRef.current = [];
       updateSceneContext(null);
+      window.removeEventListener('tour:navigate', navHandler as EventListener);
     };
   }, []);
 
