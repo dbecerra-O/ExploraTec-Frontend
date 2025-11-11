@@ -67,13 +67,16 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   // Si no está autenticado, mostrar versión de login
   if (!isAuthenticated) {
     return (
-      <div className="fixed bottom-28 left-18 z-50">
+      <div className="fixed inset-0 z-50 flex items-end justify-start p-4 sm:items-center sm:justify-center sm:p-0">
+        {/* Overlay para móviles */}
+        <div className="fixed inset-0 bg-black bg-opacity-50 sm:hidden" onClick={onClose}></div>
+        
         <div
           ref={modalRef}
-          className="w-96 h-[550px] bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden border"
+          className="w-full max-w-sm h-[85vh] sm:h-[550px] sm:max-h-[80vh] bg-white rounded-2xl sm:rounded-2xl shadow-xl flex flex-col overflow-hidden border relative sm:absolute sm:bottom-28 sm:left-18"
         >
           {/* Header */}
-          <div className="flex justify-between items-center px-4 py-2 bg-sky-600 text-white">
+          <div className="flex justify-between items-center px-4 py-3 bg-sky-600 text-white">
             <h2 className="text-sm font-semibold">Asistente Virtual</h2>
             <button onClick={onClose} className="hover:text-gray-200">
               <FiX className="w-5 h-5" />
@@ -106,14 +109,21 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
   // Versión normal para usuarios autenticados
   return (
-    <div className="fixed bottom-28 left-18 z-50">
+    <div className="fixed inset-0 z-50 flex items-end justify-start p-4 sm:items-center sm:justify-center sm:p-0">
+      {/* Overlay para móviles */}
+      <div className="fixed inset-0 bg-black bg-opacity-50 sm:hidden" onClick={onClose}></div>
+      
       <div
         ref={modalRef}
-        className="w-96 h-[550px] bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden border"
+        className="w-full max-w-sm h-[85vh] sm:h-[550px] sm:max-h-[80vh] bg-white rounded-2xl sm:rounded-2xl shadow-xl flex flex-col overflow-hidden border relative sm:absolute sm:bottom-28 sm:left-18"
       >
         {/* Header con botones */}
-        <div className="flex justify-between items-center px-4 py-2 bg-sky-600 text-white">
+        <div className="flex justify-between items-center px-4 py-3 bg-sky-600 text-white">
           <h2 className="text-sm font-semibold">Asistente Virtual</h2>
+          {/* Botón de cerrar solo en móvil */}
+          <button onClick={onClose} className="sm:hidden hover:text-gray-200">
+            <FiX className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Chat body */}
@@ -132,9 +142,9 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 <MessageContent text={msg.text} sender={msg.sender} />
                 {/* Render navigation action buttons when present */}
                 {msg.actions && msg.actions.type === "navigation" && (
-                  <div className="mt-2 flex space-x-2">
+                  <div className="mt-2 flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                     <button
-                      className="bg-white border border-sky-600 text-sky-600 px-3 py-1 rounded-md text-sm"
+                      className="bg-white border border-sky-600 text-sky-600 px-3 py-2 sm:py-1 rounded-md text-sm flex-1"
                       onClick={() => {
                         const payload = msg.actions.payload;
                         const path = payload?.pathResult?.path || payload?.navigation?.path || null;
@@ -157,7 +167,7 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                     </button>
 
                     <button
-                      className="bg-sky-600 text-white px-3 py-1 rounded-md text-sm"
+                      className="bg-sky-600 text-white px-3 py-2 sm:py-1 rounded-md text-sm flex-1"
                       onClick={() => {
                         const payload = msg.actions.payload;
                         const to = payload?.navigation?.to_scene || payload?.pathResult?.path?.slice(-1)[0];
@@ -197,7 +207,7 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
         </div>
 
         {/* Input */}
-        <div className="p-2 border-t bg-white flex items-center">
+        <div className="p-3 border-t bg-white flex items-center">
           <input
             type="text"
             placeholder="Escribe un mensaje..."
