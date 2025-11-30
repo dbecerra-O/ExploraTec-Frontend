@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { sendMessage } from "../services/user/chatService";
+import { sendMessage, sendFeedback as sendFeedbackApi } from "../services/user/chatService";
 import { findShortestPath } from "../utils/dijkstra";
 
 interface Message {
+  id?: number;
   sender: "user" | "bot";
   text: string;
   actions?: any;
+  feedback?: "like" | "dislike";
 }
 
 
@@ -87,7 +89,7 @@ export const useChatbot = () => {
       { sender: "bot", text: "¡Hola! Soy tu asistente virtual 🤖, ¿en qué puedo ayudarte?" }
     ];
   });
-  
+
   const [conversationId, setConversationId] = useState<number | null>(() => {
     const saved = localStorage.getItem(CONVERSATION_ID_KEY);
     return saved ? JSON.parse(saved) : null;
@@ -97,7 +99,7 @@ export const useChatbot = () => {
     const saved = localStorage.getItem(SCENE_CONTEXT_KEY);
     return saved ? JSON.parse(saved) : null;
   });
-  
+
   const [loading, setLoading] = useState(false);
 
   // Persistir mensajes
@@ -140,7 +142,7 @@ export const useChatbot = () => {
       // (remove or guard this in production)
       try {
         console.log("[useChatbot] sendMessage response:", response);
-      } catch (err) {}
+      } catch (err) { }
 
       // Validar respuesta
       if (!response?.assistant_message?.content) {
@@ -151,57 +153,61 @@ export const useChatbot = () => {
         setConversationId(response.conversation.id);
       }
 
-  // Normalize assistant text to remove duplicated route lines when navigation metadata exists
-  const normalizedResponse = normalizeAssistantText(response);
-  const assistantText = normalizedResponse.assistant_message?.content ?? response.assistant_message?.content ?? "";
-  const nav = response.navigation || response.navigation_data || null;
+      // Normalize assistant text to remove duplicated route lines when navigation metadata exists
+      const normalizedResponse = normalizeAssistantText(response);
+      const assistantText = normalizedResponse.assistant_message?.content ?? response.assistant_message?.content ?? "";
+      const nav = response.navigation || response.navigation_data || null;
 
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: assistantText }
+        {
+          id: response.assistant_message?.id,
+          sender: "bot",
+          text: assistantText
+        }
       ]);
       // nav already computed below
-        const intent = response.assistant_message?.intent_category || response.intent_category || null;
-        const toScene = nav?.to_scene || nav?.to_scene_id || nav?.to_scene_name || null;
+      const intent = response.assistant_message?.intent_category || response.intent_category || null;
+      const toScene = nav?.to_scene || nav?.to_scene_id || nav?.to_scene_name || null;
 
-        if ((intent === "navegacion" || nav) && toScene) {
-          // try to compute shortest path using current sceneContextId and app data
-          const fromId = sceneContextId || response.from_scene || nav?.from_scene || null;
-          const toId = typeof toScene === "string" ? toScene : String(toScene);
-          const pathResult = fromId ? findShortestPath(fromId, toId) : null;
+      if ((intent === "navegacion" || nav) && toScene) {
+        // try to compute shortest path using current sceneContextId and app data
+        const fromId = sceneContextId || response.from_scene || nav?.from_scene || null;
+        const toId = typeof toScene === "string" ? toScene : String(toScene);
+        const pathResult = fromId ? findShortestPath(fromId, toId) : null;
 
-          // Determine whether navigation should be offered:
-          // - if backend explicitly indicates already_here, don't offer
-          // - if backend indicates should_navigate === false, don't offer
-          // - if pathResult indicates zero distance or same from/to, don't offer
-          const backendAlreadyHere = nav?.already_here === true;
-          const backendShouldNavigateFalse = nav?.should_navigate === false;
-          const sameScene = !!(fromId && toId && String(fromId) === String(toId));
-          const zeroDistance = !!(pathResult && Array.isArray(pathResult.path) && pathResult.path.length <= 1);
+        // Determine whether navigation should be offered:
+        // - if backend explicitly indicates already_here, don't offer
+        // - if backend indicates should_navigate === false, don't offer
+        // - if pathResult indicates zero distance or same from/to, don't offer
+        const backendAlreadyHere = nav?.already_here === true;
+        const backendShouldNavigateFalse = nav?.should_navigate === false;
+        const sameScene = !!(fromId && toId && String(fromId) === String(toId));
+        const zeroDistance = !!(pathResult && Array.isArray(pathResult.path) && pathResult.path.length <= 1);
 
-          const offerNavigation = !(backendAlreadyHere || backendShouldNavigateFalse || sameScene || zeroDistance);
+        const offerNavigation = !(backendAlreadyHere || backendShouldNavigateFalse || sameScene || zeroDistance);
 
-          if (offerNavigation) {
-            const actionPayload = {
-              navigation: nav,
-              intent_category: intent,
-              pathResult,
-            };
+        if (offerNavigation) {
+          const actionPayload = {
+            navigation: nav,
+            intent_category: intent,
+            pathResult,
+          };
 
-            setMessages((prev) => [
-              ...prev,
-              { sender: "bot", text: "", actions: { type: "navigation", payload: actionPayload } }
-            ]);
-          } else {
-            // Optionally, we could append a short confirmation action or do nothing.
-            // For now, do not add navigation buttons when user is already at destination.
-          }
+          setMessages((prev) => [
+            ...prev,
+            { sender: "bot", text: "", actions: { type: "navigation", payload: actionPayload } }
+          ]);
+        } else {
+          // Optionally, we could append a short confirmation action or do nothing.
+          // For now, do not add navigation buttons when user is already at destination.
         }
+      }
     } catch (error) {
-      const errorMessage = error instanceof Error 
+      const errorMessage = error instanceof Error
         ? `Error: ${error.message}`
         : "Error al conectar con el servidor";
-      
+
       setMessages((prev) => [
         ...prev,
         { sender: "bot", text: errorMessage }
@@ -215,6 +221,33 @@ export const useChatbot = () => {
     setSceneContextId(sceneId);
   };
 
+  const setFeedback = async (index: number, feedback: "like" | "dislike") => {
+    // Optimistic update
+    setMessages((prev) => {
+      const newMessages = [...prev];
+      if (newMessages[index]) {
+        if (newMessages[index].feedback === feedback) {
+          const { feedback: _, ...rest } = newMessages[index];
+          newMessages[index] = rest;
+        } else {
+          newMessages[index] = { ...newMessages[index], feedback };
+        }
+      }
+      return newMessages;
+    });
+
+    // API call
+    const message = messages[index];
+    if (message && message.id) {
+      try {
+        await sendFeedbackApi(message.id, feedback);
+      } catch (error) {
+        console.error("Failed to send feedback:", error);
+        // Optionally revert optimistic update here
+      }
+    }
+  };
+
   const clearConversation = () => {
     setMessages([
       { sender: "bot", text: "¡Hola! Soy tu asistente virtual 🤖, ¿en qué puedo ayudarte?" }
@@ -226,13 +259,14 @@ export const useChatbot = () => {
     localStorage.removeItem(SCENE_CONTEXT_KEY);
   };
 
-  return { 
-    messages, 
-    sendUserMessage, 
-    loading, 
+  return {
+    messages,
+    sendUserMessage,
+    loading,
     clearConversation,
     conversationId,
     sceneContextId,
-    updateSceneContext
+    updateSceneContext,
+    setFeedback
   };
 };

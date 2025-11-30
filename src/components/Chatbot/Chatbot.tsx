@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiSend, FiX, FiLogIn } from "react-icons/fi";
+import { FiSend, FiX, FiLogIn, FiThumbsUp, FiThumbsDown } from "react-icons/fi";
 import { useChatbotContext } from "../../context/ChatbotContext";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +21,7 @@ const MessageContent: React.FC<{ text: string; sender: "user" | "bot" }> = ({ te
 export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const { messages, sendUserMessage, loading, clearConversation } = useChatbotContext();
+  const { messages, sendUserMessage, loading, clearConversation, setFeedback } = useChatbotContext();
   const [input, setInput] = useState("");
   const navigateToTour = useNavigate();
 
@@ -140,6 +140,29 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                   }`}
               >
                 <MessageContent text={msg.text} sender={msg.sender} />
+
+                {/* Feedback buttons for bot messages */}
+                {msg.sender === "bot" && (
+                  <div className="mt-2 flex items-center space-x-2 border-t border-gray-100 pt-2">
+                    <button
+                      onClick={() => setFeedback(idx, "like")}
+                      className={`p-1 rounded hover:bg-gray-100 transition-colors ${msg.feedback === "like" ? "text-green-500" : "text-gray-400"
+                        }`}
+                      title="Me gusta"
+                    >
+                      <FiThumbsUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setFeedback(idx, "dislike")}
+                      className={`p-1 rounded hover:bg-gray-100 transition-colors ${msg.feedback === "dislike" ? "text-red-500" : "text-gray-400"
+                        }`}
+                      title="No me gusta"
+                    >
+                      <FiThumbsDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
                 {/* Render navigation action buttons when present */}
                 {msg.actions && msg.actions.type === "navigation" && (
                   <div className="mt-2 flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">

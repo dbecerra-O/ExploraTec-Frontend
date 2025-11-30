@@ -1,61 +1,15 @@
-import { getMessages } from './conversationServices';
-import { Message} from '../../types/Message';
+import { Message } from "../../types/Message";
 
-export type KPIs = {
+export interface KPIs {
     totalMessages: number;
-    sceneStatistics: Array<{
-        scene: string;
-        count: number;
-        percentage: number;
-    }>;
-    intentStatistics: Array<{
-        intent: string;
-        count: number;
-        avgConfidence: number;
-        percentage: number;
-    }>;
-    dailyMessages: Array<{
-        date: string;
-        count: number;
-    }>;
-    topIntents: Array<{
-        intent: string;
-        count: number;
-    }>;
-    topScenes: Array<{
-        scene: string;
-        count: number;
-    }>;
-};
+    sceneStatistics: { scene: string; count: number; percentage: number }[];
+    intentStatistics: { intent: string; count: number; avgConfidence: number; percentage: number }[];
+    dailyMessages: { date: string; count: number }[];
+    topIntents: { intent: string; count: number; avgConfidence: number; percentage: number }[];
+    topScenes: { scene: string; count: number; percentage: number }[];
+}
 
-export const getKPIs = async (): Promise<KPIs> => {
-    try {
-        const messagesData: Message[] = [];
-        let skip = 0;
-        const limit = 100;
-        let totalMessages = 0;
-
-        const firstResponse = await getMessages(0, 1);
-        totalMessages = firstResponse.total_messages;
-
-        while (skip < totalMessages) {
-            const response = await getMessages(skip, limit);
-            messagesData.push(...response.messages);
-
-            if (response.messages.length < limit) {
-                break;
-            }
-            skip += limit;
-        }
-
-        return calculateKPIs(messagesData);
-    } catch (error) {
-        console.error('Error fetching KPIs:', error);
-        throw new Error('No se pudieron cargar las métricas del chatbot');
-    }
-};
-
-const calculateKPIs = (messages: Message[]): KPIs => {
+export const calculateKPIs = (messages: Message[]): KPIs => {
     // Estadísticas de escenas
     const sceneCounts: Record<string, number> = {};
     const intentCounts: Record<string, number> = {};
@@ -76,7 +30,9 @@ const calculateKPIs = (messages: Message[]): KPIs => {
         }
         intentConfidences[intent].push(message.intent_confidence);
 
-        const date = new Date(message.created_at).toISOString().split('T')[0];
+        // Extraer fecha en UTC para evitar problemas de zona horaria
+        const dateObj = new Date(message.created_at);
+        const date = `${dateObj.getUTCFullYear()}-${String(dateObj.getUTCMonth() + 1).padStart(2, '0')}-${String(dateObj.getUTCDate()).padStart(2, '0')}`;
         dailyCounts[date] = (dailyCounts[date] || 0) + 1;
     });
 

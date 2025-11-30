@@ -20,10 +20,12 @@ export const DailyMessagesChart: React.FC<DailyMessagesChartProps> = ({ data }) 
                 return (
                     <div key={item.date} className="flex items-center gap-4">
                         <div className="w-20 sm:w-24 text-sm text-gray-600">
-                            {new Date(item.date).toLocaleDateString('es-ES', {
-                                day: '2-digit',
-                                month: 'short'
-                            })}
+                            {(() => {
+                                // Parse date string directly to avoid timezone issues
+                                const [year, month, day] = item.date.split('-');
+                                const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                                return `${day} ${monthNames[parseInt(month) - 1]}`;
+                            })()}
                         </div>
                         <div className="flex-1">
                             <div className="flex justify-between text-sm mb-1">

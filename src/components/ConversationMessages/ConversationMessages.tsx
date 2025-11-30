@@ -31,9 +31,8 @@ const ConversationMessages: React.FC<Props> = ({ userId, conversationId }) => {
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
-                className={`p-3 rounded-lg max-w-[70%] ${
-                  i % 2 === 0 ? "ml-auto bg-gray-200" : "mr-auto bg-gray-200"
-                }`}
+                className={`p-3 rounded-lg max-w-[70%] ${i % 2 === 0 ? "ml-auto bg-gray-200" : "mr-auto bg-gray-200"
+                  }`}
               >
                 <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
                 <div className="h-3 bg-gray-300 rounded w-1/2"></div>
@@ -56,9 +55,9 @@ const ConversationMessages: React.FC<Props> = ({ userId, conversationId }) => {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-[calc(100vh-220px)]">
       {/* Header de la conversación */}
-      <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-4">
+      <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div>
@@ -71,7 +70,7 @@ const ConversationMessages: React.FC<Props> = ({ userId, conversationId }) => {
       </div>
 
       {/* Contenedor de mensajes con scroll */}
-      <div className="h-96 overflow-y-auto p-6 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
         <div className="space-y-4">
           {conversation?.messages.map((msg) => (
             <div
@@ -79,19 +78,17 @@ const ConversationMessages: React.FC<Props> = ({ userId, conversationId }) => {
               className={`flex ${msg.is_from_user ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`flex flex-col max-w-[80%] ${
-                  msg.is_from_user ? "items-end" : "items-start"
-                }`}
+                className={`flex flex-col max-w-[75%] sm:max-w-[70%] ${msg.is_from_user ? "items-end" : "items-start"
+                  }`}
               >
                 {/* Burbuja de mensaje */}
                 <div
-                  className={`px-4 py-3 rounded-2xl ${
-                    msg.is_from_user
-                      ? "bg-blue-500 text-white rounded-br-none"
-                      : "bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm"
-                  }`}
+                  className={`px-4 py-3 rounded-2xl break-words ${msg.is_from_user
+                    ? "bg-blue-500 text-white rounded-br-none"
+                    : "bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm"
+                    }`}
                 >
-                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                 </div>
 
                 {/* Información del mensaje */}
@@ -102,7 +99,7 @@ const ConversationMessages: React.FC<Props> = ({ userId, conversationId }) => {
                       minute: '2-digit'
                     })}
                   </span>
-                  
+
                   {msg.is_from_user && (
                     <span className="text-xs text-gray-500">
                       {new Date(msg.created_at).toLocaleDateString('es-ES')}
@@ -113,15 +110,13 @@ const ConversationMessages: React.FC<Props> = ({ userId, conversationId }) => {
                 {/* Feedback */}
                 {msg.feedback && (
                   <div
-                    className={`mt-2 flex items-center space-x-2 px-3 py-2 rounded-lg border ${
-                      msg.feedback.is_positive
-                        ? "bg-green-50 border-green-200 text-green-700"
-                        : "bg-red-50 border-red-200 text-red-700"
-                    } ${msg.is_from_user ? "flex-row-reverse space-x-reverse" : ""}`}
+                    className={`mt-2 flex items-center space-x-2 px-3 py-2 rounded-lg border ${msg.feedback.is_positive
+                      ? "bg-green-50 border-green-200 text-green-700"
+                      : "bg-red-50 border-red-200 text-red-700"
+                      } ${msg.is_from_user ? "flex-row-reverse space-x-reverse" : ""}`}
                   >
-                    <div className={`w-2 h-2 rounded-full ${
-                      msg.feedback.is_positive ? "bg-green-500" : "bg-red-500"
-                    }`}></div>
+                    <div className={`w-2 h-2 rounded-full ${msg.feedback.is_positive ? "bg-green-500" : "bg-red-500"
+                      }`}></div>
                     <span className="text-sm font-medium">
                       {msg.feedback.is_positive ? "👍" : "👎"} Feedback:
                     </span>
@@ -144,7 +139,7 @@ const ConversationMessages: React.FC<Props> = ({ userId, conversationId }) => {
       </div>
 
       {/* Footer con estadísticas */}
-      <div className="bg-gray-100 px-6 py-3 border-t border-gray-200">
+      <div className="bg-gray-100 px-6 py-3 border-t border-gray-200 flex-shrink-0">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div>
             {conversation?.messages && (

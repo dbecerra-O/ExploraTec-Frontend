@@ -40,12 +40,7 @@ export const StatisticsList: React.FC<StatisticsListProps> = ({
                                 </p>
                                 {item.percentage && (
                                     <p className="text-xs text-gray-500">
-                                        {item.percentage.toFixed(1)}% del total
-                                    </p>
-                                )}
-                                {item.avgConfidence && type === 'intent' && (
-                                    <p className="text-xs text-gray-500">
-                                        Confianza: {(item.avgConfidence * 100).toFixed(1)}%
+                                        {item.percentage.toFixed(1)}%
                                     </p>
                                 )}
                             </div>
