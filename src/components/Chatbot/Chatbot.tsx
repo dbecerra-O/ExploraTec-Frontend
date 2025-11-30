@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiSend, FiX, FiLogIn } from "react-icons/fi";
-import { useChatbot } from "../../hooks/useChatbot";
+import { useChatbotContext } from "../../context/ChatbotContext";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from 'react-markdown';
@@ -21,7 +21,7 @@ const MessageContent: React.FC<{ text: string; sender: "user" | "bot" }> = ({ te
 export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const { messages, sendUserMessage, loading, clearConversation } = useChatbot();
+  const { messages, sendUserMessage, loading, clearConversation } = useChatbotContext();
   const [input, setInput] = useState("");
   const navigateToTour = useNavigate();
 
@@ -70,7 +70,7 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
       <div className="fixed inset-0 z-50 flex items-end justify-start p-4 sm:items-center sm:justify-center sm:p-0">
         {/* Overlay para móviles */}
         <div className="fixed inset-0 bg-black bg-opacity-50 sm:hidden" onClick={onClose}></div>
-        
+
         <div
           ref={modalRef}
           className="w-full max-w-sm h-[85vh] sm:h-[550px] sm:max-h-[80vh] bg-white rounded-2xl sm:rounded-2xl shadow-xl flex flex-col overflow-hidden border relative sm:absolute sm:bottom-28 sm:left-18"
@@ -112,7 +112,7 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
     <div className="fixed inset-0 z-50 flex items-end justify-start p-4 sm:items-center sm:justify-center sm:p-0">
       {/* Overlay para móviles */}
       <div className="fixed inset-0 bg-black bg-opacity-50 sm:hidden" onClick={onClose}></div>
-      
+
       <div
         ref={modalRef}
         className="w-full max-w-sm h-[85vh] sm:h-[550px] sm:max-h-[80vh] bg-white rounded-2xl sm:rounded-2xl shadow-xl flex flex-col overflow-hidden border relative sm:absolute sm:bottom-28 sm:left-18"
@@ -157,7 +157,7 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                         try {
                           const ev = new CustomEvent('tour:navigate', { detail: { mode: 'step', path } });
                           window.dispatchEvent(ev);
-                        } catch (err) {}
+                        } catch (err) { }
                         // navigate to tour page which will process the navigation_path if not mounted
                         navigateToTour("/tour360");
                         onClose();
@@ -180,7 +180,7 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                         try {
                           const ev = new CustomEvent('tour:navigate', { detail: { mode: 'direct', to } });
                           window.dispatchEvent(ev);
-                        } catch (err) {}
+                        } catch (err) { }
                         navigateToTour("/tour360");
                         onClose();
                       }}

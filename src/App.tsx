@@ -10,6 +10,7 @@ import UserConversationsPage from "./private/UserConversationsPage";
 import ConversationMessagesPage from "./private/ConversationMessagesPage ";
 import AdminKPIsPage from "./private/AdminKPIsPage";
 import EventsAdminPage from "./private/EventsAdminPage";
+import { ChatbotProvider } from "./context/ChatbotContext";
 
 function App() {
   return (
@@ -35,7 +36,14 @@ function App() {
 
         {/* Rutas públicas que pueden ser accedidas*/}
         <Route path="/" element={<Main />} />
-        <Route path="/tour360" element={<ChatbotTourPage />} />
+        <Route
+          path="/tour360"
+          element={
+            <ChatbotProvider>
+              <ChatbotTourPage />
+            </ChatbotProvider>
+          }
+        />
 
         {/* Rutas protegidas que requieren autenticación */}
         <Route
