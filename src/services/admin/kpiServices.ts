@@ -9,61 +9,84 @@ export interface KPIs {
     topScenes: { scene: string; count: number; percentage: number }[];
 }
 
-export const calculateKPIs = (messages: Message[]): KPIs => {
+export const calculateKPIs = (
+    messages: Message[],
+    totalMessagesCount?: number,
+    backendIntentStats?: { category: string; count: number; avg_confidence: number }[]
+): KPIs => {
     // Estadísticas de escenas
     const sceneCounts: Record<string, number> = {};
+    const dailyCounts: Record<string, number> = {};
+
+    // Si no se proveen estadísticas del backend, las calculamos manualmente (fallback)
     const intentCounts: Record<string, number> = {};
     const intentConfidences: Record<string, number[]> = {};
-    const dailyCounts: Record<string, number> = {};
 
     messages.forEach(message => {
         // Contar por escena
         const scene = message.scene_context || 'sin_escena';
         sceneCounts[scene] = (sceneCounts[scene] || 0) + 1;
 
-        // Contar por intención
-        const intent = message.intent_category || 'sin_intencion';
-        intentCounts[intent] = (intentCounts[intent] || 0) + 1;
-
-        if (!intentConfidences[intent]) {
-            intentConfidences[intent] = [];
-        }
-        intentConfidences[intent].push(message.intent_confidence);
-
         // Extraer fecha en UTC para evitar problemas de zona horaria
         const dateObj = new Date(message.created_at);
         const date = `${dateObj.getUTCFullYear()}-${String(dateObj.getUTCMonth() + 1).padStart(2, '0')}-${String(dateObj.getUTCDate()).padStart(2, '0')}`;
         dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+
+        if (!backendIntentStats) {
+            // Contar por intención solo si no tenemos datos del backend
+            const intent = message.intent_category || 'sin_intencion';
+            intentCounts[intent] = (intentCounts[intent] || 0) + 1;
+
+            if (!intentConfidences[intent]) {
+                intentConfidences[intent] = [];
+            }
+            intentConfidences[intent].push(message.intent_confidence);
+        }
     });
 
     // Calcular porcentajes y promedios
-    const totalMessages = messages.length;
+    const total = totalMessagesCount || messages.length;
 
     const sceneStatistics = Object.entries(sceneCounts)
         .map(([scene, count]) => ({
             scene,
             count,
-            percentage: (count / totalMessages) * 100
+            percentage: total > 0 ? (count / total) * 100 : 0
         }))
         .sort((a, b) => b.count - a.count);
 
-    const intentStatistics = Object.entries(intentCounts)
-        .map(([intent, count]) => ({
-            intent,
-            count,
-            avgConfidence: intentConfidences[intent]
-                ? intentConfidences[intent].reduce((a, b) => a + b, 0) / intentConfidences[intent].length
-                : 0,
-            percentage: (count / totalMessages) * 100
-        }))
-        .sort((a, b) => b.count - a.count);
+    let intentStatistics;
+
+    if (backendIntentStats) {
+        // Usar datos del backend
+        intentStatistics = backendIntentStats
+            .map(stat => ({
+                intent: stat.category,
+                count: stat.count,
+                avgConfidence: stat.avg_confidence,
+                percentage: total > 0 ? (stat.count / total) * 100 : 0
+            }))
+            .sort((a, b) => b.count - a.count);
+    } else {
+        // Usar cálculo manual
+        intentStatistics = Object.entries(intentCounts)
+            .map(([intent, count]) => ({
+                intent,
+                count,
+                avgConfidence: intentConfidences[intent]
+                    ? intentConfidences[intent].reduce((a, b) => a + b, 0) / intentConfidences[intent].length
+                    : 0,
+                percentage: total > 0 ? (count / total) * 100 : 0
+            }))
+            .sort((a, b) => b.count - a.count);
+    }
 
     const dailyMessages = Object.entries(dailyCounts)
         .map(([date, count]) => ({ date, count }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
     return {
-        totalMessages,
+        totalMessages: total,
         sceneStatistics,
         intentStatistics,
         dailyMessages,

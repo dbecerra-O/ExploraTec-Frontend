@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Marzipano from "marzipano";
-import { useChatbot } from "../../hooks/useChatbot";
+import { useChatbotContext } from "../../context/ChatbotContext";
 import appData from "./appData";
 import './VirtualTour.css';
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,7 @@ const VirtualTour: React.FC = () => {
   });
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const [activeInfoHotspot, setActiveInfoHotspot] = useState<any>(null);
-  const { clearConversation, updateSceneContext } = useChatbot();
+  const { clearConversation, updateSceneContext } = useChatbotContext();
   const navigate = useNavigate();
 
 
@@ -138,10 +138,10 @@ const VirtualTour: React.FC = () => {
 
     if (createdScenes.length > 0) {
       const savedSceneId = localStorage.getItem(CURRENT_SCENE_KEY);
-      const initialScene = savedSceneId 
+      const initialScene = savedSceneId
         ? createdScenes.find(s => s.data.id === savedSceneId) || createdScenes[0]
         : createdScenes[0];
-        
+
       initialScene.scene.switchTo();
       setCurrentSceneId(initialScene.data.id);
       updateSceneContext(initialScene.data.id);
@@ -262,7 +262,7 @@ const VirtualTour: React.FC = () => {
 
   const currentScene = scenesRef.current.find(s => s.data.id === currentSceneId)?.data;
 
-    const handleExitTour = () => {
+  const handleExitTour = () => {
     clearConversation();
     localStorage.removeItem(CURRENT_SCENE_KEY);
     navigate("/");
@@ -376,11 +376,11 @@ const VirtualTour: React.FC = () => {
 
       {/* Botón de salir del recorrido */}
       <button
-          onClick={handleExitTour}
-          className="absolute top-6 left-6 z-30 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg px-4 py-3 border border-white/20"
-          title="Salir del recorrido y limpiar conversación"
-          >
-          Salir del tour
+        onClick={handleExitTour}
+        className="absolute top-6 left-6 z-30 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg px-4 py-3 border border-white/20"
+        title="Salir del recorrido y limpiar conversación"
+      >
+        Salir del tour
       </button>
 
       {/* Indicador de escena actual */}

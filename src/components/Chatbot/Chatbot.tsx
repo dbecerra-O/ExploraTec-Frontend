@@ -4,6 +4,7 @@ import { useChatbotContext } from "../../context/ChatbotContext";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from 'react-markdown';
+import { findShortestPath } from "../../utils/dijkstra";
 
 // Componente para renderizar mensajes con Markdown
 const MessageContent: React.FC<{ text: string; sender: "user" | "bot" }> = ({ text, sender }) => {
@@ -34,7 +35,7 @@ const MessageContent: React.FC<{ text: string; sender: "user" | "bot" }> = ({ te
 export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const { messages, sendUserMessage, loading, clearConversation, setFeedback } = useChatbotContext();
+  const { messages, sendUserMessage, loading, clearConversation, setFeedback, sceneContextId } = useChatbotContext();
   const [input, setInput] = useState("");
   const navigateToTour = useNavigate();
 
@@ -183,18 +184,26 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                       className="bg-white border border-sky-600 text-sky-600 px-3 py-2 sm:py-1 rounded-md text-sm flex-1"
                       onClick={() => {
                         const payload = msg.actions.payload;
-                        const path = payload?.pathResult?.path || payload?.navigation?.path || null;
+                        const toScene = payload?.navigation?.to_scene || payload?.navigation?.to_scene_id || payload?.navigation?.to_scene_name;
+
+                        // Always calculate path using current scene context
+                        let path = null;
+                        if (sceneContextId && toScene) {
+                          const pathResult = findShortestPath(sceneContextId, String(toScene));
+                          path = pathResult?.path || null;
+                          console.log("[Chatbot] Calculated path from", sceneContextId, "to", toScene, ":", path);
+                        }
+
                         if (path) {
                           localStorage.setItem("navigation_path", JSON.stringify(path));
-                          // start at first element (from)
                           localStorage.setItem("navigation_step_index", "0");
                         }
-                        // dispatch event so VirtualTour (if already mounted) will start stepping immediately
+
                         try {
                           const ev = new CustomEvent('tour:navigate', { detail: { mode: 'step', path } });
                           window.dispatchEvent(ev);
                         } catch (err) { }
-                        // navigate to tour page which will process the navigation_path if not mounted
+
                         navigateToTour("/tour360");
                         onClose();
                       }}
@@ -206,13 +215,11 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                       className="bg-sky-600 text-white px-3 py-2 sm:py-1 rounded-md text-sm flex-1"
                       onClick={() => {
                         const payload = msg.actions.payload;
-                        const to = payload?.navigation?.to_scene || payload?.pathResult?.path?.slice(-1)[0];
+                        const to = payload?.navigation?.to_scene;
                         if (to) {
                           localStorage.setItem("current_scene_id", String(to));
                         }
-                        // clear any pending navigation path
                         localStorage.removeItem("navigation_path");
-                        // dispatch event so VirtualTour can switch immediately if mounted
                         try {
                           const ev = new CustomEvent('tour:navigate', { detail: { mode: 'direct', to } });
                           window.dispatchEvent(ev);
@@ -262,6 +269,6 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 };

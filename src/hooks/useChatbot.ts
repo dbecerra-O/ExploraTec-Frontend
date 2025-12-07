@@ -132,6 +132,7 @@ export const useChatbot = () => {
     setLoading(true);
 
     try {
+      console.log("[useChatbot] Sending message with scene_context:", sceneContextId);
       const response = await sendMessage({
         content,
         conversation_id: conversationId,
@@ -174,6 +175,13 @@ export const useChatbot = () => {
         // try to compute shortest path using current sceneContextId and app data
         const fromId = sceneContextId || response.from_scene || nav?.from_scene || null;
         const toId = typeof toScene === "string" ? toScene : String(toScene);
+        console.log("[useChatbot] Navigation path calculation:", {
+          sceneContextId,
+          fromId,
+          toId,
+          response_from_scene: response.from_scene,
+          nav_from_scene: nav?.from_scene
+        });
         const pathResult = fromId ? findShortestPath(fromId, toId) : null;
 
         // Determine whether navigation should be offered:
@@ -191,7 +199,7 @@ export const useChatbot = () => {
           const actionPayload = {
             navigation: nav,
             intent_category: intent,
-            pathResult,
+            // pathResult removed - will be calculated dynamically when button is clicked
           };
 
           setMessages((prev) => [

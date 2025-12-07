@@ -18,7 +18,11 @@ export const KPIDashboard: React.FC = () => {
                     getMessages(),
                     getFeedbackStatistics()
                 ]);
-                const kpiData = calculateKPIs(messagesResponse.messages);
+                const kpiData = calculateKPIs(
+                    messagesResponse.messages,
+                    messagesResponse.total_messages,
+                    messagesResponse.intent_statistics
+                );
                 setKpis(kpiData);
                 setFeedbackStats(feedbackResponse);
             } catch (err) {
@@ -67,7 +71,7 @@ export const KPIDashboard: React.FC = () => {
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-sm font-medium text-gray-700">Tasa de Satisfacción</span>
                                     <span className={`text-lg font-bold ${feedbackStats.positive_rate_percent >= 70 ? 'text-green-600' :
-                                            feedbackStats.positive_rate_percent >= 40 ? 'text-yellow-600' : 'text-red-600'
+                                        feedbackStats.positive_rate_percent >= 40 ? 'text-yellow-600' : 'text-red-600'
                                         }`}>
                                         {feedbackStats.positive_rate_percent.toFixed(1)}%
                                     </span>
@@ -75,7 +79,7 @@ export const KPIDashboard: React.FC = () => {
                                 <div className="w-full bg-gray-200 rounded-full h-3">
                                     <div
                                         className={`h-full rounded-full transition-all duration-500 ${feedbackStats.positive_rate_percent >= 70 ? 'bg-green-500' :
-                                                feedbackStats.positive_rate_percent >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                                            feedbackStats.positive_rate_percent >= 40 ? 'bg-yellow-500' : 'bg-red-500'
                                             }`}
                                         style={{ width: `${feedbackStats.positive_rate_percent}%` }}
                                     ></div>
