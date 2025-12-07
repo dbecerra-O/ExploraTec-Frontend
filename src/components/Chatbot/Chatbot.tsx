@@ -155,8 +155,8 @@ export const ChatbotModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
               >
                 <MessageContent text={msg.text} sender={msg.sender} />
 
-                {/* Feedback buttons for bot messages */}
-                {msg.sender === "bot" && (
+                {/* Feedback buttons for bot messages (only for generated text, excluding welcome message) */}
+                {msg.sender === "bot" && idx > 0 && msg.text && (
                   <div className="mt-2 flex items-center space-x-2 border-t border-gray-100 pt-2">
                     <button
                       onClick={() => setFeedback(idx, "like")}
